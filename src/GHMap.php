@@ -82,7 +82,7 @@ class GHMap extends Field
         }
     }
 
-    public function resolve($resource, $attribute): mixed
+    public function resolve($resource, ?string $attribute = null): void
     {
         $latitudeField = $this->meta["latitude"] ?? "latitude";
         $longitudeField = $this->meta["longitude"] ?? "longitude";
