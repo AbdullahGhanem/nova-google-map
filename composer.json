@@ -1,15 +1,19 @@
 {
     "name": "ghanem/google-map",
-    "description": "Nova Google Map With Autocomplete Field Package.",
+    "description": "Google Map with Places Autocomplete field for Laravel Nova 4 & 5.",
     "keywords": [
         "laravel",
+        "nova",
         "nova 4",
         "nova 5",
-        "google map"
+        "google map",
+        "google places",
+        "autocomplete",
+        "geocoding"
     ],
     "license": "MIT",
     "require": {
-        "php": "^7.4|^8.0",
+        "php": "^8.1",
         "laravel/nova": "^4.0|^5.0"
     },
     "autoload": {

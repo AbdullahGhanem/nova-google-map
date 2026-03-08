@@ -9,46 +9,46 @@
         <div class="md:w-1/4 md:py-3">
             <slot>
                 <h4 class="font-bold md:font-normal">
-                    <span>{{ this.field.name }}</span>
+                    <span>{{ field.name }}</span>
                 </h4>
             </slot>
         </div>
         <div class="md:w-3/4 md:py-3 break-words">
             <slot name="value">
-                <span>{{ field.latitude + ', ' + field.longitude }}</span>
+                <span v-if="hasCoordinates">{{ field.latitude + ', ' + field.longitude }}</span>
                 <GMapMap
+                    v-if="hasCoordinates"
                     :center="map.center"
                     :zoom="map.zoom"
                     style="height: 20rem; margin-top: 25px"
                 >
                     <GMapMarker :position="map.center" :draggable="false" />
                 </GMapMap>
+                <span v-else>—</span>
             </slot>
         </div>
     </div>
 </template>
 
 <script>
-const map = { center: {}, selectedPlace: false }
-
 export default {
     props: ['index', 'resource', 'resourceName', 'resourceId', 'field'],
 
     data() {
         return {
-            map,
-            api_key: null,
-            latitude: null,
-            longitude: null
+            map: { center: { lat: 0, lng: 0 }, zoom: 16 },
+            hasCoordinates: false,
         }
     },
 
     mounted() {
-        this.map.center.lat = parseFloat(this.field.latitude)
-        this.map.center.lng = parseFloat(this.field.longitude)
-        this.latitude = parseFloat(this.field.latitude)
-        this.longitude = parseFloat(this.field.longitude)
-        this.map.zoom = 16
-    }
+        const lat = parseFloat(this.field.latitude)
+        const lng = parseFloat(this.field.longitude)
+
+        if (!isNaN(lat) && !isNaN(lng)) {
+            this.map.center = { lat, lng }
+            this.hasCoordinates = true
+        }
+    },
 }
 </script>

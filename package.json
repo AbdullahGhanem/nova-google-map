@@ -19,6 +19,6 @@
         "vue-loader": "^16.8.3"
     },
     "dependencies": {
-        "@fawmi/vue-google-maps": "*"
+        "@fawmi/vue-google-maps": "^0.9.0"
     }
 }

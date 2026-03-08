@@ -8,14 +8,9 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 
 class GHMap extends Field
 {
-    /**
-     * The field's component.
-     *
-     * @var string
-     */
     public $component = 'gh-map';
 
-    public function __construct($name, $attribute = null, callable $resolveCallback = null)
+    public function __construct(string $name, ?string $attribute = null, ?callable $resolveCallback = null)
     {
         $this->attribute = $attribute ?? str_replace(' ', '_', Str::lower($name));
 
@@ -27,72 +22,81 @@ class GHMap extends Field
             ->zoom(config('nova-google-maps.default_zoom'));
     }
 
-    public function apiKey($apiKey)
+    public function apiKey(string $apiKey): self
     {
         return $this->withMeta(['api_key' => $apiKey]);
     }
 
-    public function latitude($latitude)
+    public function latitude(string|float $latitude): self
     {
         return $this->withMeta(['latitude' => $latitude, 'latitude_field' => $latitude]);
     }
 
-    public function longitude($longitude)
+    public function longitude(string|float $longitude): self
     {
         return $this->withMeta(['longitude' => $longitude, 'longitude_field' => $longitude]);
     }
 
-    public function latitude_field($latitude_field)
+    public function latitudeField(string $latitudeField): self
     {
-        return $this->withMeta(['latitude_field' => $latitude_field]);
-    }
-    public function longitude_field($longitude_field)
-    {
-        return $this->withMeta(['longitude_field' => $longitude_field]);
+        return $this->withMeta(['latitude_field' => $latitudeField]);
     }
 
+    public function longitudeField(string $longitudeField): self
+    {
+        return $this->withMeta(['longitude_field' => $longitudeField]);
+    }
 
-    public function zoom($zoom)
+    public function zoom(int|float $zoom): self
     {
         return $this->withMeta(['zoom' => $zoom]);
     }
 
-    public function hideLatitude()
+    public function hideLatitude(): self
     {
         return $this->withMeta(['hide_latitude' => true]);
     }
 
-    public function hideLongitude()
+    public function hideLongitude(): self
     {
         return $this->withMeta(['hide_longitude' => true]);
     }
 
-    protected function fillAttributeFromRequest(NovaRequest $request, $requestAttribute, $model, $attribute)
+    protected function fillAttributeFromRequest(NovaRequest $request, $requestAttribute, $model, $attribute): void
     {
-        $latitudeField = $this->meta["latitude_field"] ?? "latitude";
-        $longitudeField = $this->meta["longitude_field"] ?? "longitude";
+        $latitudeField = $this->meta['latitude_field'] ?? 'latitude';
+        $longitudeField = $this->meta['longitude_field'] ?? 'longitude';
 
-        foreach ($request->input($attribute) as $attr => $data) {
-            if ($data != 'null') {
-                $result = $request->{$requestAttribute};
+        $data = $request->input($attribute);
 
-                $model->{$latitudeField} = $result['latitude'];
-                $model->{$longitudeField} = $result['longitude'];
+        if (is_array($data) && isset($data['latitude'], $data['longitude'])) {
+            $lat = $data['latitude'];
+            $lng = $data['longitude'];
+
+            if ($lat !== null && $lat !== 'null' && $lng !== null && $lng !== 'null') {
+                $lat = (float) $lat;
+                $lng = (float) $lng;
+
+                if ($lat >= -90 && $lat <= 90 && $lng >= -180 && $lng <= 180) {
+                    $model->{$latitudeField} = $lat;
+                    $model->{$longitudeField} = $lng;
+                }
             }
         }
     }
 
     public function resolve($resource, ?string $attribute = null): void
     {
-        $latitudeField = $this->meta["latitude"] ?? "latitude";
-        $longitudeField = $this->meta["longitude"] ?? "longitude";
+        $latitudeField = $this->meta['latitude_field'] ?? 'latitude';
+        $longitudeField = $this->meta['longitude_field'] ?? 'longitude';
+
         if ($resource->getAttribute($latitudeField)) {
             $this->latitude(floatval($resource->getAttribute($latitudeField)));
-            $this->latitude_field($latitudeField);
+            $this->latitudeField($latitudeField);
         }
         if ($resource->getAttribute($longitudeField)) {
             $this->longitude(floatval($resource->getAttribute($longitudeField)));
-            $this->longitude_field($longitudeField);
+            $this->longitudeField($longitudeField);
         }
     }
 }

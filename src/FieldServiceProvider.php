@@ -8,12 +8,7 @@ use Laravel\Nova\Nova;
 
 class FieldServiceProvider extends ServiceProvider
 {
-    /**
-     * Bootstrap any application services.
-     *
-     * @return void
-     */
-    public function boot()
+    public function boot(): void
     {
         Nova::serving(function (ServingNova $event) {
             Nova::script('google-map', __DIR__ . '/../dist/js/field.js');
@@ -24,12 +19,7 @@ class FieldServiceProvider extends ServiceProvider
         });
     }
 
-    /**
-     * Register any application services.
-     *
-     * @return void
-     */
-    public function register()
+    public function register(): void
     {
         $config_path = dirname(__DIR__) . '/publishable/config/nova-google-maps.php';
 
@@ -37,5 +27,7 @@ class FieldServiceProvider extends ServiceProvider
             [$config_path => config_path('nova-google-maps.php')],
             'config'
         );
+
+        $this->mergeConfigFrom($config_path, 'nova-google-maps');
     }
 }
