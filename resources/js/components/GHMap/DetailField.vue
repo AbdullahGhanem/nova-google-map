@@ -34,21 +34,20 @@
 export default {
     props: ['index', 'resource', 'resourceName', 'resourceId', 'field'],
 
-    data() {
-        return {
-            map: { center: { lat: 0, lng: 0 }, zoom: 16 },
-            hasCoordinates: false,
-        }
-    },
+    computed: {
+        hasCoordinates() {
+            return !isNaN(parseFloat(this.field.latitude)) && !isNaN(parseFloat(this.field.longitude))
+        },
 
-    mounted() {
-        const lat = parseFloat(this.field.latitude)
-        const lng = parseFloat(this.field.longitude)
-
-        if (!isNaN(lat) && !isNaN(lng)) {
-            this.map.center = { lat, lng }
-            this.hasCoordinates = true
-        }
+        map() {
+            if (!this.hasCoordinates) {
+                return { center: { lat: 0, lng: 0 }, zoom: 16 }
+            }
+            return {
+                center: { lat: parseFloat(this.field.latitude), lng: parseFloat(this.field.longitude) },
+                zoom: 16,
+            }
+        },
     },
 }
 </script>

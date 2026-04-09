@@ -63,8 +63,7 @@ export default {
 
     data() {
         return {
-            map: { center: { lat: 0, lng: 0 }, zoom: 3, selectedPlace: false },
-            api_key: null,
+            map: { center: { lat: 0, lng: 0 }, zoom: 3 },
             latitude: null,
             longitude: null,
             hideLatitude: false,
@@ -74,21 +73,27 @@ export default {
         }
     },
 
-    mounted() {
-        Nova.$on('latitude-update', data => {
+    created() {
+        this._onLatUpdate = data => {
             this.latitude = data
             this.map.center = { ...this.map.center, lat: parseFloat(data) }
-        })
-        Nova.$on('longitude-update', data => {
+        }
+        this._onLngUpdate = data => {
             this.longitude = data
             this.map.center = { ...this.map.center, lng: parseFloat(data) }
             this.map.zoom = 16
-        })
+        }
+    },
+
+    mounted() {
+        Nova.$on('latitude-update', this._onLatUpdate)
+        Nova.$on('longitude-update', this._onLngUpdate)
     },
 
     beforeUnmount() {
-        Nova.$off('latitude-update')
-        Nova.$off('longitude-update')
+        Nova.$off('latitude-update', this._onLatUpdate)
+        Nova.$off('longitude-update', this._onLngUpdate)
+        clearTimeout(this.geocodeTimer)
     },
 
     methods: {
@@ -106,7 +111,6 @@ export default {
             this.map.zoom = zoom
 
             if (this.resourceId) {
-                this.map.selectedPlace = true
                 this.map.zoom = 16
             }
         },
@@ -118,7 +122,7 @@ export default {
 
         onPlaceChanged(place) {
             if (!place || !place.geometry) return
-            this.setPlace(place, false)
+            this.setPlace(place)
         },
 
         markerDragend(marker) {
@@ -160,28 +164,16 @@ export default {
             }
         },
 
-        setPlace(place, isDragend) {
+        setPlace(place) {
             this.emitAddressComponents(place)
 
-            if (isDragend) {
-                this.latitude = place.geometry.location.lat
-                this.longitude = place.geometry.location.lng
-                this.map.center = {
-                    lat: place.geometry.location.lat,
-                    lng: place.geometry.location.lng,
-                }
-            } else {
-                const lat = typeof place.geometry.location.lat === 'function'
-                    ? place.geometry.location.lat()
-                    : place.geometry.location.lat
-                const lng = typeof place.geometry.location.lng === 'function'
-                    ? place.geometry.location.lng()
-                    : place.geometry.location.lng
+            const loc = place.geometry.location
+            const lat = typeof loc.lat === 'function' ? loc.lat() : loc.lat
+            const lng = typeof loc.lng === 'function' ? loc.lng() : loc.lng
 
-                this.latitude = lat
-                this.longitude = lng
-                this.map.center = { lat, lng }
-            }
+            this.latitude = lat
+            this.longitude = lng
+            this.map.center = { lat, lng }
             this.map.zoom = 16
         },
 

@@ -7,31 +7,36 @@ use PHPUnit\Framework\TestCase;
 
 class GHMapTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // Set default config values for testing
-        if (!function_exists('config')) {
-            // Config function will be available in Laravel context
-        }
-    }
-
     public function test_field_component_name(): void
     {
         $this->assertSame('gh-map', (new \ReflectionClass(GHMap::class))->getDefaultProperties()['component']);
     }
 
-    public function test_coordinate_validation_bounds(): void
+    public function test_meta_keys_are_set_independently(): void
     {
-        // Latitude must be between -90 and 90
-        $this->assertTrue(-90 <= 41.657523 && 41.657523 <= 90);
-        $this->assertFalse(-90 <= 91 && 91 <= 90);
-        $this->assertFalse(-90 <= -91 && -91 <= 90);
+        $reflection = new \ReflectionClass(GHMap::class);
+        $instance = $reflection->newInstanceWithoutConstructor();
+        $instance->meta = [];
 
-        // Longitude must be between -180 and 180
-        $this->assertTrue(-180 <= -101.157292 && -101.157292 <= 180);
-        $this->assertFalse(-180 <= 181 && 181 <= 180);
-        $this->assertFalse(-180 <= -181 && -181 <= 180);
+        $instance->latitude(24.5);
+        $this->assertSame(24.5, $instance->meta['latitude']);
+        $this->assertArrayNotHasKey('latitude_field', $instance->meta);
+
+        $instance->latitudeField('lat');
+        $this->assertSame('lat', $instance->meta['latitude_field']);
+        $this->assertSame(24.5, $instance->meta['latitude']);
+    }
+
+    public function test_hide_latitude_and_longitude(): void
+    {
+        $reflection = new \ReflectionClass(GHMap::class);
+        $instance = $reflection->newInstanceWithoutConstructor();
+        $instance->meta = [];
+
+        $instance->hideLatitude();
+        $instance->hideLongitude();
+
+        $this->assertTrue($instance->meta['hide_latitude']);
+        $this->assertTrue($instance->meta['hide_longitude']);
     }
 }

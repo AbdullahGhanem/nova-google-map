@@ -29,12 +29,12 @@ class GHMap extends Field
 
     public function latitude(string|float $latitude): self
     {
-        return $this->withMeta(['latitude' => $latitude, 'latitude_field' => $latitude]);
+        return $this->withMeta(['latitude' => $latitude]);
     }
 
     public function longitude(string|float $longitude): self
     {
-        return $this->withMeta(['longitude' => $longitude, 'longitude_field' => $longitude]);
+        return $this->withMeta(['longitude' => $longitude]);
     }
 
     public function latitudeField(string $latitudeField): self
@@ -90,13 +90,11 @@ class GHMap extends Field
         $latitudeField = $this->meta['latitude_field'] ?? 'latitude';
         $longitudeField = $this->meta['longitude_field'] ?? 'longitude';
 
-        if ($resource->getAttribute($latitudeField)) {
+        if ($resource->getAttribute($latitudeField) !== null) {
             $this->latitude(floatval($resource->getAttribute($latitudeField)));
-            $this->latitudeField($latitudeField);
         }
-        if ($resource->getAttribute($longitudeField)) {
+        if ($resource->getAttribute($longitudeField) !== null) {
             $this->longitude(floatval($resource->getAttribute($longitudeField)));
-            $this->longitudeField($longitudeField);
         }
     }
 }
